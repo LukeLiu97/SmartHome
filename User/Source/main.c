@@ -1,7 +1,7 @@
 /**
 ******************************************************************************
   * @file       main.c
-  * @brief      Ö÷³ÌÐòÔ´ÎÄ¼þ
+  * @brief      ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½Ä¼ï¿½
   * @version    1.0
   * @date       Aug-26-2019 Mon
   * @update     
@@ -25,6 +25,7 @@ static void RCC_Config(void);
 
 void ChipID_Get(u8 *ChipID_Buff);
 void ChipID_Display(void);
+
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -34,34 +35,63 @@ void ChipID_Display(void);
   */
 int main(void)
 {
-	/* ÆÁ±ÎÈ«¾ÖÖÐ¶Ï */
+	u8 Red = 0;
+	/* ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½ï¿½Ð¶ï¿½ */
 	__set_PRIMASK(1);
 	
-	/* ÖÐ¶ÏÓÅÏÈ¼¶ÅäÖÃ */
+	/* ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½ï¿½ï¿½ */
 	NVIC_Config();
 	
-	/* ÍâÉèÊ±ÖÓÊ¹ÄÜ */
+	/* ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ê¹ï¿½ï¿½ */
 	RCC_Config();
 	
 	LED_Init();
+	RGB_LED_Init();
 	
-	/* ³õÊ¼»¯SP2 */
+	/* ï¿½ï¿½Ê¼ï¿½ï¿½SP2 */
 	SPI2_Init();
 	
-	/* ³õÊ¼»¯OLEDÄ£¿é²¢ÇÒÇåÆÁ */
+	/* ï¿½ï¿½Ê¼ï¿½ï¿½OLEDÄ£ï¿½é²¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 	OLED_Init();
 	OLED_Config();
 	OLED_Clear();
+	
+	TIM3_Interrupt_Init(1000);
+	
+	Step_Motor_Init();
 
-	/* ÔÊÐíÈ«¾ÖÖÐ¶Ï */
+	/* ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½ï¿½Ð¶ï¿½ */
 	__set_PRIMASK(0); 
 	
 	ChipID_Display();
 	
 	while(1)
 	{
-		LED2_OR();
+		RGB_LED_Control(0,0,Red++);
+		if(Red > 64)
+		{
+			Red = 0;
+		}
+		else
+		{
+		}
 		delay_ms(1000);
+		
+		switch(Curtain.CurrentPlace)
+		{
+			case 0:
+				Curtain.TargetPlace = 4;
+				break;
+			case 4:
+				Curtain.TargetPlace = 6;
+				break;
+			case 6:
+				Curtain.TargetPlace = 8;
+				break;
+			case 8:
+				Curtain.TargetPlace = 0;
+				break;
+		}
 	}
 	
 	/* No Retval */
@@ -70,21 +100,37 @@ int main(void)
 
 static void NVIC_Config(void)
 {
-//	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
 
 	/* Configure two bit for preemption priority */
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+	
+	/* Enable and set TIM3 Interrupt to the highest priority */
+	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 	
 	return ;
 }
 
 static void RCC_Config(void)
 {
+	/* GPIOA Periph clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	
 	/* GPIOB Periph clock enable */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	
 	/* SPI2 Periph clock enable */
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+	
+	/* TIM3 clock enable */
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	
+	/* TIM4 clock enable */
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 	
 	return ;
 }
@@ -92,7 +138,7 @@ static void RCC_Config(void)
 
 void ChipID_Get(u8 *ChipID_Buff)
 {
-	const u8 *Ptr = (const u8*)(0x1FFFF7E8); 
+	volatile const u8 *Ptr = (__I u8*)(0x1FFFF7E8); 
 	
 	for(u32 i = 0;i < 12;i++)
 	{

@@ -567,6 +567,16 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\Source\spi.c</FilePath>
             </File>
+            <File>
+              <FileName>tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\motor.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -1131,6 +1141,16 @@
               <FileName>spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\Source\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\motor.c</FilePath>
             </File>
           </Files>
         </Group>

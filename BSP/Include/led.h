@@ -18,6 +18,8 @@ extern "C"
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
 
+#include "tim.h"
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
@@ -26,8 +28,10 @@ extern "C"
 #define LED2_ON() (GPIO_ResetBits(GPIOB, GPIO_Pin_14))
 #define LED2_OR() (GPIOB->ODR ^= (0x1 << 14))
 
-    /* Exported functions ------------------------------------------------------- */
-    void LED_Init(void);
+/* Exported functions ------------------------------------------------------- */
+void LED_Init(void);
+void RGB_LED_Init(void);
+void RGB_LED_Control(u8 Blue, u8 Green, u8 Red);
 
 #ifdef __cplusplus
 }

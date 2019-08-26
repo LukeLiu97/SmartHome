@@ -150,6 +150,47 @@ void SysTick_Handler(void)
 /*  file (startup_stm32f10x_xx.s).                                            */
 /******************************************************************************/
 
+/**
+  * @brief  This function handles TIM3 interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM3_IRQHandler(void)
+{
+	static u32 Laps = 0;
+	if(TIM_GetITStatus(TIM3,TIM_IT_Update) != RESET)
+	{
+		/* Interrupt task */
+		if(Curtain.TargetPlace > Curtain.CurrentPlace)
+		{
+			Curtain.MoveDirection = 1;
+		}
+		else if(Curtain.TargetPlace < Curtain.CurrentPlace)
+		{
+			Curtain.MoveDirection = -1;
+		}
+		else
+		{
+			Curtain.MoveDirection = 0;
+		}
+		
+		Step_Motor_Roll();
+		
+		if(Laps > 100)
+		{
+			Laps = 0;
+			Curtain.CurrentPlace += Curtain.MoveDirection;
+		}
+		else
+		{
+			Laps++;
+		}
+		
+		
+		/* Clears the TIMx's interrupt pending bit. */
+		TIM_ClearITPendingBit(TIM3,TIM_IT_Update);
+	}
+}
 
 /**
   * @brief  This function handles PPP interrupt request.

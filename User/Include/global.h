@@ -19,13 +19,20 @@ extern "C"
 #include "stm32f10x.h"
 
 /* Exported types ------------------------------------------------------------*/
+typedef struct CurtainStu_
+{
+	u8 CurrentPlace;
+	u8 TargetPlace;
+	s8 MoveDirection;
+}CurtainStu;
+
 /* Extern variables ----------------------------------------------------------*/
 extern u8 ReversalFlag;
 
+extern CurtainStu Curtain;
+
 /* Exported constants --------------------------------------------------------*/
-
 /* Exported macro ------------------------------------------------------------*/
-
 /* Exported functions ------------------------------------------------------- */
 
 #ifdef __cplusplus

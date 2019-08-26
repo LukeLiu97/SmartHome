@@ -26,6 +26,7 @@ extern "C"
 #include "spi.h"
 #include "oled.h"
 #include "font.h"
+#include "motor.h"
 
 /* Exported types ------------------------------------------------------------*/
 
