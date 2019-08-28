@@ -108,9 +108,9 @@ void OLED_SendData(u8 Data)
 void OLED_Config(void)
 {
     OLED_RES_L();
-    delay_ms(100);
+    Delay_ms(100);
     OLED_RES_H();
-    delay_ms(100); //复位
+    Delay_ms(100); //复位
 
     OLED_SendCmd(0xAE); //关闭显示
     OLED_SendCmd(0xD5); //设置时钟分频因子,震荡频率

@@ -47,7 +47,7 @@ void Delay(u32 t)
     return;
 }
 
-void delay_ms(u32 xms)
+void Delay_ms(u32 xms)
 {
     if (SystickLock == 1)
     {
@@ -91,7 +91,7 @@ void delay_ms(u32 xms)
     return;
 }
 
-void delay_us(u32 xus)
+void Delay_us(u32 xus)
 {
     //
 

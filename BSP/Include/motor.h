@@ -24,6 +24,7 @@ extern "C"
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+void Motor_Init(void);
 void Step_Motor_Init(void);
 void Step_Motor_Roll(void);
 

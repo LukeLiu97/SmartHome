@@ -101,9 +101,9 @@ void RGB_LED_Send8Byte(u32 DataFrame)
 		DataFrame <<= 1;
 		
 		RGB_LED_CLK_H();
-		TIM4_Delay_us(10);
+		Delay_us(10);
 		RGB_LED_CLK_L();
-		TIM4_Delay_us(10);
+		Delay_us(10);
 	}
 	RGB_LED_CLK_L();
 	RGB_LED_DATA_L();

@@ -20,6 +20,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+static void JTAG_Disable(void);
 static void NVIC_Config(void);
 static void RCC_Config(void);
 
@@ -38,8 +39,11 @@ void ChipID_Display(void);
 int main(void)
 {
 	u8 IR_Data = 0;
+	FunctionalState Fan_Status = DISABLE;
 	
 	__set_PRIMASK(1);
+	
+	JTAG_Disable();
 	
 	NVIC_Config();
 	
@@ -50,7 +54,6 @@ int main(void)
 	DebugMode_PrintfSysInfo();
 #endif
 	
-	
 	LED_Init();
 	RGB_LED_Init();
 	
@@ -60,7 +63,7 @@ int main(void)
 	OLED_Config();
 	OLED_Clear();
 	
-	TIM3_Interrupt_Init(1000);
+	TIM4_Interrupt_Init(1000);
 	
 	Step_Motor_Init();
 
@@ -68,61 +71,40 @@ int main(void)
 	
 	TIM2_InputCapture_Channel2_Init();
 	
+	Motor_Init();
+	
+	TIM3_PWM_Init(100);
+	
 	__set_PRIMASK(0); 
 	
 	ChipID_Display();
 	
-	Delay(3000);
+	Delay_ms(3000);
 	
 	while(1)
 	{
+#ifdef RELEASE
 		UserData_Updata();
+#endif
 		
 		IR_Data = IR_Cell_ReadData();
 		
-		if(IR_Data >= '0' && IR_Data <= '9')
-		{
-			Curtain.TargetPlace = IR_Data - '0';
-		}
-		else if((IR_Data >= 24 && IR_Data <= 27) || IR_Data == '\n')
-		{
-			switch(IR_Data)
-			{
-				case 24:
-					RGB.Blue = 100;
-					RGB.Green = 0;
-					RGB.Red = 0;
-					break;
-				case 25:
-					RGB.Blue = 0;
-					RGB.Green = 64;
-					RGB.Red = 0;
-					break;
-				case 26:
-					RGB.Blue = 0;
-					RGB.Green = 0;
-					RGB.Red = 64;
-					break;
-				case 27:
-					RGB.Blue = 64;
-					RGB.Green = 64;
-					RGB.Red = 64;
-					break;
-				default:
-					RGB.Blue = 0;
-					RGB.Green = 0;
-					RGB.Red = 0;
-			}
-		}
-		
 		RGB_LED_Control(RGB.Blue,RGB.Green,RGB.Red);
 
-		delay_ms(1000);
+		Delay_ms(100);
 	}
 	
 	/* No Retval */
 }
 
+
+static void JTAG_Disable(void)
+{
+	/* 重映射 */
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);// 复位后才可再次重映射
+	
+	return ;
+}
 
 static void NVIC_Config(void)
 {
@@ -138,8 +120,8 @@ static void NVIC_Config(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	
-	/* Enable and set TIM3 Interrupt to the high priority */
-	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+	/* Enable and set TIM4 Interrupt to the high priority */
+	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -150,6 +132,9 @@ static void NVIC_Config(void)
 
 static void RCC_Config(void)
 {
+	/* AFIO Periph clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+	
 	/* GPIOA Periph clock enable */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	

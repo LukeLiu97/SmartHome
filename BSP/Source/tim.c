@@ -60,7 +60,7 @@ void TIM2_InputCapture_Channel2_Init(void)
     TIM_Cmd(TIM2, ENABLE);
 }
 
-void TIM3_Interrupt_Init(u16 us)
+void TIM3_PWM_Init(u16 us)
 {
     uint16_t PrescalerValue = 0;
 
@@ -76,22 +76,44 @@ void TIM3_Interrupt_Init(u16 us)
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
-
-    /* Prescaler configuration */
+	 
+	/* Prescaler configuration */
     TIM_PrescalerConfig(TIM3, PrescalerValue, TIM_PSCReloadMode_Immediate);
 
+	TIM_OCInitTypeDef  TIM_OCInitStructure;
+	
+	TIM_OCStructInit(&TIM_OCInitStructure);
+	
+	/* PWM1 Mode configuration: Channel1 */
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OCInitStructure.TIM_Pulse = us / 2 - 1;
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+
+	TIM_OC1Init(TIM3, &TIM_OCInitStructure);
+
+	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
+	
+	/* PWM1 Mode configuration: Channel2 */
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OCInitStructure.TIM_Pulse = us / 2 - 1;
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
+
+	TIM_OC2Init(TIM3, &TIM_OCInitStructure);
+
+	TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Enable);
+	
+  
     TIM_ARRPreloadConfig(TIM3,ENABLE);
 
-    TIM_ClearFlag(TIM3, TIM_FLAG_Update);
-
-    /* TIM IT enable */
-    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
-
-    /* TIM3 enable counter */
-    TIM_Cmd(TIM3, ENABLE);
+	TIM_CtrlPWMOutputs(TIM3,ENABLE);
+	
+//    /* TIM3 enable counter */
+//    TIM_Cmd(TIM3, ENABLE);
 }
 
-void TIM4_Delay_us(u16 us)
+void TIM4_Interrupt_Init(u16 us)
 {
     uint16_t PrescalerValue = 0;
 
@@ -108,22 +130,21 @@ void TIM4_Delay_us(u16 us)
 
     TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
 
-    TIM_ARRPreloadConfig(TIM4, ENABLE);
+    /* Prescaler configuration */
+    TIM_PrescalerConfig(TIM4, PrescalerValue, TIM_PSCReloadMode_Immediate);
+
+    TIM_ARRPreloadConfig(TIM4,ENABLE);
 
     TIM_ClearFlag(TIM4, TIM_FLAG_Update);
+
+    /* TIM IT enable */
+    TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
 
     /* TIM4 enable counter */
     TIM_Cmd(TIM4, ENABLE);
-
-    while (TIM_GetFlagStatus(TIM4, TIM_FLAG_Update) == RESET)
-    {
-    }
-
-    /* TIM4 enable counter */
-    TIM_Cmd(TIM4, DISABLE);
-
-    TIM_ClearFlag(TIM4, TIM_FLAG_Update);
 }
+
+
 
 
 /**

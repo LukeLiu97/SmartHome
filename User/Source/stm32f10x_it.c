@@ -234,14 +234,14 @@ void TIM2_IRQHandler(void)
 }
 
 /**
-  * @brief  This function handles TIM3 interrupt request.
+  * @brief  This function handles TIM4 interrupt request.
   * @param  None
   * @retval None
   */
-void TIM3_IRQHandler(void)
+void TIM4_IRQHandler(void)
 {
 	static u32 Laps = 0;
-	if(TIM_GetITStatus(TIM3,TIM_IT_Update) != RESET)
+	if(TIM_GetITStatus(TIM4,TIM_IT_Update) != RESET)
 	{
 		/* Interrupt task */
 		if(Curtain.TargetPlace > Curtain.CurrentPlace)
@@ -270,8 +270,8 @@ void TIM3_IRQHandler(void)
 		}
 		
 		
-		/* Clears the TIM3 interrupt update pending bit. */
-		TIM_ClearITPendingBit(TIM3,TIM_IT_Update);
+		/* Clears the TIM4 interrupt update pending bit. */
+		TIM_ClearITPendingBit(TIM4,TIM_IT_Update);
 	}
 }
 

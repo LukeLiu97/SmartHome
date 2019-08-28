@@ -25,8 +25,8 @@ extern "C"
 /* Exported functions ------------------------------------------------------- */
 
 void TIM2_InputCapture_Channel2_Init(void);
-void TIM3_Interrupt_Init(u16 ms);
-void TIM4_Delay_us(u16 us);
+void TIM3_PWM_Init(u16 us);
+void TIM4_Interrupt_Init(u16 us);
 
 #ifdef __cplusplus
 }
