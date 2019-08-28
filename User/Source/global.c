@@ -18,6 +18,12 @@
 u8 ReversalFlag = 0;
 
 CurtainStu Curtain ={10,0,0};
+
+RemoteStu Remote = {0};
+
+RGBStu RGB = {0};
+
+union UserData_ UserData;
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/

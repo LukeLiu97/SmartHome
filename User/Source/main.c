@@ -1,7 +1,7 @@
 /**
 ******************************************************************************
   * @file       main.c
-  * @brief      ������Դ�ļ�
+  * @brief      
   * @version    1.0
   * @date       Aug-26-2019 Mon
   * @update     
@@ -23,6 +23,8 @@
 static void NVIC_Config(void);
 static void RCC_Config(void);
 
+void DebugMode_PrintfSysInfo(void);
+
 void ChipID_Get(u8 *ChipID_Buff);
 void ChipID_Display(void);
 
@@ -35,23 +37,25 @@ void ChipID_Display(void);
   */
 int main(void)
 {
-	u8 Red = 0;
-	/* ����ȫ���ж� */
+	u8 IR_Data = 0;
+	
 	__set_PRIMASK(1);
 	
-	/* �ж����ȼ����� */
 	NVIC_Config();
 	
-	/* ����ʱ��ʹ�� */
 	RCC_Config();
+	
+#ifdef DEBUG
+	USART1_Init(115200);
+	DebugMode_PrintfSysInfo();
+#endif
+	
 	
 	LED_Init();
 	RGB_LED_Init();
 	
-	/* ��ʼ��SP2 */
 	SPI2_Init();
 	
-	/* ��ʼ��OLEDģ�鲢������ */
 	OLED_Init();
 	OLED_Config();
 	OLED_Clear();
@@ -60,38 +64,60 @@ int main(void)
 	
 	Step_Motor_Init();
 
-	/* ����ȫ���ж� */
+	IR_Cell_Init();
+	
+	TIM2_InputCapture_Channel2_Init();
+	
 	__set_PRIMASK(0); 
 	
 	ChipID_Display();
 	
+	Delay(3000);
+	
 	while(1)
 	{
-		RGB_LED_Control(0,0,Red++);
-		if(Red > 64)
-		{
-			Red = 0;
-		}
-		else
-		{
-		}
-		delay_ms(1000);
+		UserData_Updata();
 		
-		switch(Curtain.CurrentPlace)
+		IR_Data = IR_Cell_ReadData();
+		
+		if(IR_Data >= '0' && IR_Data <= '9')
 		{
-			case 0:
-				Curtain.TargetPlace = 4;
-				break;
-			case 4:
-				Curtain.TargetPlace = 6;
-				break;
-			case 6:
-				Curtain.TargetPlace = 8;
-				break;
-			case 8:
-				Curtain.TargetPlace = 0;
-				break;
+			Curtain.TargetPlace = IR_Data - '0';
 		}
+		else if((IR_Data >= 24 && IR_Data <= 27) || IR_Data == '\n')
+		{
+			switch(IR_Data)
+			{
+				case 24:
+					RGB.Blue = 100;
+					RGB.Green = 0;
+					RGB.Red = 0;
+					break;
+				case 25:
+					RGB.Blue = 0;
+					RGB.Green = 64;
+					RGB.Red = 0;
+					break;
+				case 26:
+					RGB.Blue = 0;
+					RGB.Green = 0;
+					RGB.Red = 64;
+					break;
+				case 27:
+					RGB.Blue = 64;
+					RGB.Green = 64;
+					RGB.Red = 64;
+					break;
+				default:
+					RGB.Blue = 0;
+					RGB.Green = 0;
+					RGB.Red = 0;
+			}
+		}
+		
+		RGB_LED_Control(RGB.Blue,RGB.Green,RGB.Red);
+
+		delay_ms(1000);
 	}
 	
 	/* No Retval */
@@ -105,10 +131,17 @@ static void NVIC_Config(void)
 	/* Configure two bit for preemption priority */
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	
-	/* Enable and set TIM3 Interrupt to the highest priority */
-	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+	/* Enable and set TIM2 Interrupt to the highest priority */
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	
+	/* Enable and set TIM3 Interrupt to the high priority */
+	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	
@@ -123,14 +156,40 @@ static void RCC_Config(void)
 	/* GPIOB Periph clock enable */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	
+	/* USART1 Periph clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+	
 	/* SPI2 Periph clock enable */
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+	
+	/* TIM2 clock enable */
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	
 	/* TIM3 clock enable */
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 	
 	/* TIM4 clock enable */
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+	
+	return ;
+}
+
+void DebugMode_PrintfSysInfo(void)
+{
+#ifdef DEBUG
+	RCC_ClocksTypeDef RCC_Clocks;
+
+	RCC_GetClocksFreq(&RCC_Clocks);
+	
+	printf("-----------------------------------------------\r\n");
+	printf("Debug Mode\r\n");
+	printf("SYSCLK_Frequency:\t%d\r\n",RCC_Clocks.SYSCLK_Frequency);
+	printf("HCLK_Frequency:\t\t%d\r\n",RCC_Clocks.HCLK_Frequency);
+	printf("PCLK1_Frequency:\t%d\r\n",RCC_Clocks.PCLK1_Frequency);
+	printf("PCLK2_Frequency:\t%d\r\n",RCC_Clocks.PCLK2_Frequency);
+	printf("ADCCLK_Frequency:\t%d\r\n",RCC_Clocks.ADCCLK_Frequency);
+	printf("-----------------------------------------------\r\n");
+#endif
 	
 	return ;
 }
@@ -167,19 +226,19 @@ void ChipID_Display(void)
 
 /* Exported functions --------------------------------------------------------*/
 
-//#ifdef DEBUG
-////Redirect fputc function
-//int fputc(int ch,FILE *stream)
-//{
-//	USART_SendData(USART1,ch);
-//	while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
-//	{
-//	}
-//	
-//	return ch;
-//}
+#ifdef DEBUG
+//Redirect fputc function
+int fputc(int ch,FILE *stream)
+{
+	USART_SendData(USART1,ch);
+	while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET)
+	{
+	}
+	
+	return ch;
+}
 
-//#endif
+#endif
     
 /**
   * @}

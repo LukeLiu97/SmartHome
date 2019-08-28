@@ -1,45 +1,32 @@
 /**
 ******************************************************************************
-  * @file       main.h
-  * @brief      主程序头文件
-  * @note       
-  * @version    1.1
-  * @date       Tue 06-08-2019
+  * @file       irda.h
+  * @brief      
+  * @version    1.0
+  * @date       Aug-27-2019 Tue
 ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef __IRDA_H
+#define __IRDA_H
 
 #ifdef __cplusplus
-extern "C"
-{
+ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
-
-#include <stdio.h>
-
-#include "led.h"
-#include "uart.h"
-#include "time.h"
-#include "spi.h"
-#include "oled.h"
-#include "font.h"
-#include "motor.h"
-#include "irda.h"
-#include "embed_flash.h"
+#include "global.h"
 
 /* Exported types ------------------------------------------------------------*/
-
 /* Exported constants --------------------------------------------------------*/
-
 /* Exported macro ------------------------------------------------------------*/
+#define RemoteData_Status() GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_1)
 
 /* Exported functions ------------------------------------------------------- */
-
+void IR_Cell_Init(void);
+u8 IR_Cell_ReadData(void);
 
 #ifdef __cplusplus
 }

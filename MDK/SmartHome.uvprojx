@@ -34,7 +34,7 @@
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
           <SFDFile>D:\Program Files\keil\ARM\Pack\Keil\STM32F1xx_DFP\1.1.0\SVD\STM32F103xx.SFR</SFDFile>
-          <bCustSvd>1</bCustSvd>
+          <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
           <IncludePath></IncludePath>
@@ -327,8 +327,8 @@
             <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
-            <v6Lang>1</v6Lang>
-            <v6LangP>1</v6LangP>
+            <v6Lang>3</v6Lang>
+            <v6LangP>3</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
@@ -401,6 +401,11 @@
               <FileName>font.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\Source\font.c</FilePath>
+            </File>
+            <File>
+              <FileName>embed_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\Source\embed_flash.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -576,6 +581,16 @@
               <FileName>motor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\Source\motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>irda.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\irda.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\uart.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -977,6 +992,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\Source\font.c</FilePath>
             </File>
+            <File>
+              <FileName>embed_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\Source\embed_flash.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1151,6 +1171,16 @@
               <FileName>motor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\Source\motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>irda.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\irda.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\uart.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -26,10 +26,36 @@ typedef struct CurtainStu_
 	s8 MoveDirection;
 }CurtainStu;
 
+typedef struct RemoteStu_
+{
+	u8 Start;
+	u32 RemoteCode;
+	u8 	End;
+}RemoteStu;
+
+typedef struct RGBStu_
+{
+	u8 Blue;
+	u8 Green;
+	u8 Red;
+}RGBStu;
+
+union UserData_
+{
+	u32 Data;
+	u8 DataArray[4];
+};
+
 /* Extern variables ----------------------------------------------------------*/
 extern u8 ReversalFlag;
 
 extern CurtainStu Curtain;
+
+extern RemoteStu Remote;
+
+extern RGBStu RGB;
+
+extern union UserData_ UserData;
 
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/

@@ -24,7 +24,7 @@ extern "C"
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
-void TIM2_Delay_ms(u16 ms);
+void TIM2_InputCapture_Channel2_Init(void);
 void TIM3_Interrupt_Init(u16 ms);
 void TIM4_Delay_us(u16 us);
 

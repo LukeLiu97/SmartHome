@@ -151,6 +151,89 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief  This function handles TIM2 interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIM2_IRQHandler(void)
+{
+	u16 HighVoltage_Time = 0;
+	
+	if(TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET)
+	{
+		/* Interrupt task */
+		// 当边沿触发一一直未产生，计数上溢,通讯空闲
+		if(Remote.Start != 0)
+		{
+			Remote.Start = 0;
+			Remote.End = 1;
+		}
+		
+		/* Clears the TIM2 interrupt update pending bit. */
+		TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
+	}
+	else
+	{
+	}
+	
+	if(TIM_GetITStatus(TIM2,TIM_IT_CC2) != RESET)
+	{
+		/* Interrupt task */
+		
+		// 恢复为高电平
+		if(RemoteData_Status() == SET)
+		{
+			TIM_SetCounter(TIM2,0);
+			TIM2->CCER |= (0x01 << 5);
+			TIM_OC2PolarityConfig(TIM2,TIM_OCPolarity_Low);
+		}
+		// 恢复为低电平
+		else
+		{
+			HighVoltage_Time = TIM_GetCapture2(TIM2);
+			TIM_OC2PolarityConfig(TIM2,TIM_OCPolarity_High);
+			TIM_SetCounter(TIM2,0);
+			
+			if(Remote.Start == 0)
+			{
+				// TODO Start 4500us
+				if(HighVoltage_Time > 4300 && HighVoltage_Time < 4700)
+				{
+					Remote.Start = 1;
+					TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+				}
+				else
+				{
+				}
+			}
+			else
+			{
+				if (HighVoltage_Time > 460 && HighVoltage_Time < 660)// TODO Bit 0 560us
+				{
+					Remote.RemoteCode >>= 1;
+					Remote.RemoteCode &= ~(0x80000000);
+				}
+				else if(HighVoltage_Time > 1580 && HighVoltage_Time < 1780)// TODO Bit 1 1680us
+				{
+					Remote.RemoteCode >>= 1;
+					Remote.RemoteCode |= (0x80000000);
+				}
+				else
+				{
+				}
+			}
+			
+		}
+		/* Clear TIM2 Capture compare interrupt pending bit */
+		TIM_ClearITPendingBit(TIM2, TIM_IT_CC2);
+		
+	}
+	else
+	{
+	}
+}
+
+/**
   * @brief  This function handles TIM3 interrupt request.
   * @param  None
   * @retval None
@@ -176,7 +259,7 @@ void TIM3_IRQHandler(void)
 		
 		Step_Motor_Roll();
 		
-		if(Laps > 100)
+		if(Laps > 80)
 		{
 			Laps = 0;
 			Curtain.CurrentPlace += Curtain.MoveDirection;
@@ -187,7 +270,7 @@ void TIM3_IRQHandler(void)
 		}
 		
 		
-		/* Clears the TIMx's interrupt pending bit. */
+		/* Clears the TIM3 interrupt update pending bit. */
 		TIM_ClearITPendingBit(TIM3,TIM_IT_Update);
 	}
 }
