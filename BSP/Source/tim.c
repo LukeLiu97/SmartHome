@@ -62,6 +62,9 @@ void TIM2_InputCapture_Channel2_Init(void)
 
 void TIM3_PWM_Init(u16 us)
 {
+	/* TIM3 enable counter */
+	TIM_Cmd(TIM3, DISABLE);	
+	
     uint16_t PrescalerValue = 0;
 
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
@@ -74,43 +77,32 @@ void TIM3_PWM_Init(u16 us)
     TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
-	 
-	/* Prescaler configuration */
-    TIM_PrescalerConfig(TIM3, PrescalerValue, TIM_PSCReloadMode_Immediate);
 
-	TIM_OCInitTypeDef  TIM_OCInitStructure;
 	
-	TIM_OCStructInit(&TIM_OCInitStructure);
+	TIM_OCInitTypeDef  TIM_OCInitStructure;
 	
 	/* PWM1 Mode configuration: Channel1 */
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = us / 2 - 1;
+	TIM_OCInitStructure.TIM_Pulse = 250;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-
 	TIM_OC1Init(TIM3, &TIM_OCInitStructure);
-
 	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
 	
 	/* PWM1 Mode configuration: Channel2 */
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = us / 2 - 1;
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
-
+	TIM_OCInitStructure.TIM_Pulse = 750;
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 	TIM_OC2Init(TIM3, &TIM_OCInitStructure);
-
 	TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Enable);
 	
-  
-    TIM_ARRPreloadConfig(TIM3,ENABLE);
-
-	TIM_CtrlPWMOutputs(TIM3,ENABLE);
+//    TIM_ARRPreloadConfig(TIM3,ENABLE);
 	
-//    /* TIM3 enable counter */
-//    TIM_Cmd(TIM3, ENABLE);
+//	TIM_CtrlPWMOutputs(TIM3,ENABLE);
+	
+	TIM_Cmd(TIM3,DISABLE);
 }
 
 void TIM4_Interrupt_Init(u16 us)

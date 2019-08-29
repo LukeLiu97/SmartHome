@@ -11,7 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/** @addtogroup 
+/** @addtogroup main 
   * @{
   */
 
@@ -40,14 +40,14 @@ int main(void)
 {
 	u8 IR_Data = 0;
 	FunctionalState Fan_Status = DISABLE;
+	float Temper = 0;
+	float Humidity = 0;
 	
 	__set_PRIMASK(1);
 	
-	JTAG_Disable();
-	
 	NVIC_Config();
-	
 	RCC_Config();
+	JTAG_Disable();
 	
 #ifdef DEBUG
 	USART1_Init(115200);
@@ -73,7 +73,9 @@ int main(void)
 	
 	Motor_Init();
 	
-	TIM3_PWM_Init(100);
+	TIM3_PWM_Init(1000);
+	
+	DHT11_Init();
 	
 	__set_PRIMASK(0); 
 	
@@ -87,8 +89,55 @@ int main(void)
 		UserData_Updata();
 #endif
 		
+		
+		DHT11_TemperAndHumidity(&Temper,&Humidity);
+		
 		IR_Data = IR_Cell_ReadData();
 		
+		if(IR_Data >= '0' && IR_Data <= '9')
+		{
+			Curtain.TargetPlace = IR_Data - '0';
+		}
+		else if((IR_Data >= 24 && IR_Data <= 27) || IR_Data == '\n')
+		{
+			switch(IR_Data)
+			{
+				case 24:
+					RGB.Blue = 64;
+					RGB.Green = 0;
+					RGB.Red = 0;
+					break;
+				case 25:
+					RGB.Blue = 0;
+					RGB.Green = 64;
+					RGB.Red = 0;
+					break;
+				case 26:
+					RGB.Blue = 0;
+					RGB.Green = 0;
+					RGB.Red = 64;
+					break;
+				case 27:
+					RGB.Blue = 64;
+					RGB.Green = 64;
+					RGB.Red = 64;
+					break;
+				default:
+					RGB.Blue = 0;
+					RGB.Green = 0;
+					RGB.Red = 0;
+					if(Fan_Status == DISABLE)
+					{
+						Fan_Status = ENABLE;
+					}
+					else
+					{
+						Fan_Status = DISABLE;
+					}
+			}
+		}
+		
+		TIM_Cmd(TIM3,Fan_Status);
 		RGB_LED_Control(RGB.Blue,RGB.Green,RGB.Red);
 
 		Delay_ms(100);
@@ -97,12 +146,9 @@ int main(void)
 	/* No Retval */
 }
 
-
 static void JTAG_Disable(void)
 {
-	/* 重映射 */
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);// 复位后才可再次重映射
-	
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);
 	return ;
 }
 

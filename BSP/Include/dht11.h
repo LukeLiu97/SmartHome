@@ -1,46 +1,30 @@
 /**
 ******************************************************************************
-  * @file       main.h
-  * @brief      主程序头文件
-  * @note       
-  * @version    1.1
-  * @date       Tue 06-08-2019
+  * @file       dht11.h
+  * @brief      DH11 Temper Sensor Driver Header File
+  * @version    1.0
+  * @date       Aug-28-2019 Wed
 ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef __DHT11_H
+#define __DHT11_H
 
 #ifdef __cplusplus
-extern "C"
-{
+ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
-
-#include <stdio.h>
-
-#include "led.h"
-#include "uart.h"
 #include "time.h"
-#include "spi.h"
-#include "oled.h"
-#include "font.h"
-#include "motor.h"
-#include "irda.h"
-#include "embed_flash.h"
-#include "dht11.h"
 
 /* Exported types ------------------------------------------------------------*/
-
 /* Exported constants --------------------------------------------------------*/
-
 /* Exported macro ------------------------------------------------------------*/
-
 /* Exported functions ------------------------------------------------------- */
-
+void DHT11_Init(void);
+u8 DHT11_TemperAndHumidity(float *Temperature,float *Humidity);
 
 #ifdef __cplusplus
 }

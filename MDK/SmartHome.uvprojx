@@ -592,6 +592,11 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\Source\uart.c</FilePath>
             </File>
+            <File>
+              <FileName>dht11.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\dht11.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -1181,6 +1186,11 @@
               <FileName>uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\Source\uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>dht11.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\dht11.c</FilePath>
             </File>
           </Files>
         </Group>
