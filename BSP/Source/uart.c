@@ -53,6 +53,10 @@ void USART1_Init(u32 BaudRate)
 
     USART_Init(USART1, &USART_InitStruct);
 
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+//    USART_ITConfig(USART1, USART_IT_IDLE, ENABLE);
+
+
     USART_Cmd(USART1, ENABLE);
 }
 
@@ -89,8 +93,6 @@ void USART2_Init(u32 BaudRate)
     USART_Init(USART2, &USART_InitStruct);
 
     USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-    USART_ITConfig(USART2, USART_IT_TXE, DISABLE);
-    // 使能 USART1
 
     USART_Cmd(USART2, ENABLE); //使能之后 TX TXE 置位
 }
@@ -103,6 +105,20 @@ void UART2_SendByte(u8 Data)
     }
 
     return;
+}
+
+void UART2_SendString(u8 *String)
+{
+	while(*String != '\0')
+	{
+		USART_SendData(USART2, *String);
+		while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET)
+		{
+		}
+		String++;
+	}
+	
+	return ;
 }
 
 /**

@@ -28,6 +28,7 @@
 #define M_BEAT3() do{M_OUT1(0);M_OUT2(1);M_OUT3(1);M_OUT4(0);}while(0)
 #define M_BEAT4() do{M_OUT1(1);M_OUT2(0);M_OUT3(1);M_OUT4(0);}while(0)
 /* Private variables ---------------------------------------------------------*/
+StepMotorStu TargetStepMotor;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
@@ -56,12 +57,28 @@ void Motor_Init(void)
     return ;
 }
 
-void Motor(void)
+void Motor_Control(s8 Motor)
 {
-//	TIM_SetAutoreload(); //AAR
-//	TIM_SetCompare1(); //CCR1
-//	TIM_OC1PolarityConfig() //CCER_CC1P
-//	TIM_Cmd();//TIM_CR1_CEN
+	if(Motor == 0)
+	{
+		TIM_SetCompare1(TIM3,0);
+		TIM_SetCompare2(TIM3,0);
+		TIM_Cmd(TIM3,DISABLE);
+	}
+	else if(Motor > 0)
+	{
+		TIM_SetCompare1(TIM3,Motor * 8);
+		TIM_SetCompare2(TIM3,0);
+		TIM_Cmd(TIM3,ENABLE);
+	}
+	else
+	{
+		TIM_SetCompare1(TIM3,0);
+		TIM_SetCompare2(TIM3,Motor * -1 * 8);
+		TIM_Cmd(TIM3,ENABLE);
+	}
+	
+	return ;
 }
 
 
@@ -71,7 +88,7 @@ void Motor(void)
   * @param  NULL
   * @return NULL
   */
-void Step_Motor_Init(void)
+void StepMotor_Init(void)
 {
     /* MOTOR_IA PA7 MOTOR_I^A PA6 MOTOR_IB PA5 MOTOR_I^B PA4 */
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -88,9 +105,9 @@ void Step_Motor_Init(void)
     return;
 }
 
-void Step_Motor_Roll(void)
+void StepMotor_Roll(void)
 {
-	s8 Direction = Curtain.MoveDirection;
+	s8 Direction = SysInfo.Curtain.MoveDirection;
 	static u8 CurrentBeat = 0;
 	
 	if(Direction != 0)
@@ -140,8 +157,6 @@ void Step_Motor_Roll(void)
 		default:
 			M_BEAT0();
 	}
-	
-	
 }
 
 

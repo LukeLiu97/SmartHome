@@ -178,10 +178,10 @@ u8 DHT11_TemperAndHumidity(float *Temperature,float *Humidity)
 	}
 	else
 	{
-		TemperMantissa = DHT11_RecvByte();
-		TemperFraction = DHT11_RecvByte();
 		HumidityMantissa = DHT11_RecvByte();
 		HumidityFraction = DHT11_RecvByte();// й╪жун╙0x00
+		TemperMantissa = DHT11_RecvByte();
+		TemperFraction = DHT11_RecvByte();
 		CheckSum = DHT11_RecvByte();
 		
 		DHT11_Data_Output();

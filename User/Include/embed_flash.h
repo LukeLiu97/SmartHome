@@ -29,7 +29,7 @@
 /* Exported functions ------------------------------------------------------- */
 
 u8 EmbedFlash_Write(u32 Addr,const u32 *Data,size_t DataSize);
-void UserData_Updata(void);
+void UserData_Update(void);
 
 #ifdef __cplusplus
 }

@@ -17,7 +17,7 @@ extern "C"
 #endif
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
-
+#include "global.h"
 #include "time.h"
 
 /* Exported types ------------------------------------------------------------*/
@@ -31,7 +31,7 @@ extern "C"
 /* Exported functions ------------------------------------------------------- */
 void LED_Init(void);
 void RGB_LED_Init(void);
-void RGB_LED_Control(u8 Blue, u8 Green, u8 Red);
+void RGB_LED_Control(RGBStu RGB);
 
 #ifdef __cplusplus
 }

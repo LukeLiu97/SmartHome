@@ -23,9 +23,15 @@ extern "C"
 /* Exported constants --------------------------------------------------------*/
 extern const u8 HexChar_8x16[16][16];
 
-extern const u8 Logo_72x64[8][72];
-extern const u8 Fingerprint_64px[8][64];
-extern const u8 RFIDCard_64px[8][64];
+extern const u8 SymbolChar_8x16[2][16];
+extern const u8 SymbolChar_16x16[2][32];
+
+extern const u8 SuccessString_16x16[4][16];
+extern const u8 FailString_16x16[4][16];
+extern const u8 TemperString_16x16[4][16];
+extern const u8 HumidityString_16x16[4][16];
+extern const u8 SerialNumberString_16x16[8][16];
+extern const u8 NetStatusString_16x16[8][16];
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */

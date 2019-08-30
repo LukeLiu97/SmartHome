@@ -111,10 +111,10 @@ void RGB_LED_Send8Byte(u32 DataFrame)
 	return ;
 }
 
-void RGB_LED_Control(u8 Blue, u8 Green, u8 Red)
+void RGB_LED_Control(RGBStu RGB)
 {
 	RGB_LED_Send8Byte(0);
-	RGB_LED_Send8Byte(RGB_LED_DataFrame(Blue,Green,Red));
+	RGB_LED_Send8Byte(RGB_LED_DataFrame(RGB.Blue,RGB.Green,RGB.Red));
 	
 	return ;
 }

@@ -25,9 +25,9 @@ extern "C"
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void Motor_Init(void);
-void Step_Motor_Init(void);
-void Step_Motor_Roll(void);
-
+void Motor_Control(s8 Motor);
+void StepMotor_Init(void);
+void StepMotor_Roll(void);
 
 #ifdef __cplusplus
 }

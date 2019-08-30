@@ -1,7 +1,7 @@
 /**
 ******************************************************************************
   * @file       main.c
-  * @brief      
+  * @brief      智能家居工程源文件
   * @version    1.0
   * @date       Aug-26-2019 Mon
   * @update     
@@ -23,11 +23,12 @@
 static void JTAG_Disable(void);
 static void NVIC_Config(void);
 static void RCC_Config(void);
+static void Peripherals_Init(void);
 
 void DebugMode_PrintfSysInfo(void);
-
 void ChipID_Get(u8 *ChipID_Buff);
-void ChipID_Display(void);
+void OLED_Display(void);
+void Remote_Control(u8 IR_Value);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -39,9 +40,6 @@ void ChipID_Display(void);
 int main(void)
 {
 	u8 IR_Data = 0;
-	FunctionalState Fan_Status = DISABLE;
-	float Temper = 0;
-	float Humidity = 0;
 	
 	__set_PRIMASK(1);
 	
@@ -54,93 +52,47 @@ int main(void)
 	DebugMode_PrintfSysInfo();
 #endif
 	
-	LED_Init();
-	RGB_LED_Init();
-	
-	SPI2_Init();
-	
-	OLED_Init();
-	OLED_Config();
-	OLED_Clear();
-	
-	TIM4_Interrupt_Init(1000);
-	
-	Step_Motor_Init();
-
-	IR_Cell_Init();
-	
-	TIM2_InputCapture_Channel2_Init();
-	
-	Motor_Init();
-	
-	TIM3_PWM_Init(1000);
-	
-	DHT11_Init();
+	Peripherals_Init();
 	
 	__set_PRIMASK(0); 
 	
-	ChipID_Display();
+	ChipID_Get(SysInfo.SysSN);
 	
-	Delay_ms(3000);
+	/* 复位步进电机 */
+	SysInfo.Curtain.CurrentPlace = 12;
 	
+	Delay_ms(500);
+	
+	SysInfo.WIFI_Status |= ESP8266_HTTP_Init();
+	
+	SysInfo.WIFI_Status |= ESP8266_ConnectWIFI((u8 *)"MI 6",(u8 *)"25892589");
+
+	SysInfo.WIFI_Status |= ESP8266_ConnetServer((u8*)"TCP",(u8*)"134.175.80.178",(u8*)"8080");
+	
+
 	while(1)
 	{
 #ifdef RELEASE
-		UserData_Updata();
+		UserData_Update();
 #endif
+		SysInfo.WIFI_Status |= ESP8266_HTTPRequestGet((u8*)"134.175.80.178");
 		
+		SysInfo.WIFI_Status |= ESP8266_GetEventInfo(SysInfo);
 		
-		DHT11_TemperAndHumidity(&Temper,&Humidity);
+		ESP8266_EventInfoHandle(&SysInfo);
 		
-		IR_Data = IR_Cell_ReadData();
+		DHT11_TemperAndHumidity(&SysInfo.Temper,&SysInfo.Humidity);
 		
-		if(IR_Data >= '0' && IR_Data <= '9')
-		{
-			Curtain.TargetPlace = IR_Data - '0';
-		}
-		else if((IR_Data >= 24 && IR_Data <= 27) || IR_Data == '\n')
-		{
-			switch(IR_Data)
-			{
-				case 24:
-					RGB.Blue = 64;
-					RGB.Green = 0;
-					RGB.Red = 0;
-					break;
-				case 25:
-					RGB.Blue = 0;
-					RGB.Green = 64;
-					RGB.Red = 0;
-					break;
-				case 26:
-					RGB.Blue = 0;
-					RGB.Green = 0;
-					RGB.Red = 64;
-					break;
-				case 27:
-					RGB.Blue = 64;
-					RGB.Green = 64;
-					RGB.Red = 64;
-					break;
-				default:
-					RGB.Blue = 0;
-					RGB.Green = 0;
-					RGB.Red = 0;
-					if(Fan_Status == DISABLE)
-					{
-						Fan_Status = ENABLE;
-					}
-					else
-					{
-						Fan_Status = DISABLE;
-					}
-			}
-		}
+		IR_Data = IR_Cell_ReadData();	
+		Remote_Control(IR_Data);
 		
-		TIM_Cmd(TIM3,Fan_Status);
-		RGB_LED_Control(RGB.Blue,RGB.Green,RGB.Red);
-
-		Delay_ms(100);
+		Motor_Control(SysInfo.FanMotor);
+		RGB_LED_Control(SysInfo.RGB_LED);
+	
+		SysInfo.WIFI_Status |= ESP8266_HTTPRequestReport((u8*)"134.175.80.178",SysInfo);
+				
+		OLED_Display();
+		
 	}
 	
 	/* No Retval */
@@ -162,7 +114,7 @@ static void NVIC_Config(void)
 	/* Enable and set TIM2 Interrupt to the highest priority */
 	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	
@@ -173,6 +125,13 @@ static void NVIC_Config(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	
+	/* Enable and set USART1 Interrupt to the middle priority */
+	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
 	return ;
 }
 
@@ -190,6 +149,9 @@ static void RCC_Config(void)
 	/* USART1 Periph clock enable */
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 	
+	/* USART2 Periph clock enable */
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	
 	/* SPI2 Periph clock enable */
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
 	
@@ -203,6 +165,34 @@ static void RCC_Config(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 	
 	return ;
+}
+
+static void Peripherals_Init(void)
+{
+	USART2_Init(115200);
+	
+	LED_Init();
+	RGB_LED_Init();
+	
+	SPI2_Init();
+	
+	OLED_Init();
+	OLED_Config();
+	OLED_Clear();
+	
+	TIM4_Interrupt_Init(1000);
+	
+	StepMotor_Init();
+
+	IR_Cell_Init();
+	
+	TIM2_InputCapture_Channel2_Init();
+	
+	Motor_Init();
+	
+	TIM3_PWM_Init(1000);
+	
+	DHT11_Init();
 }
 
 void DebugMode_PrintfSysInfo(void)
@@ -237,21 +227,91 @@ void ChipID_Get(u8 *ChipID_Buff)
 	return ;
 }
 
-void ChipID_Display(void)
+void OLED_Display(void)
 {
-	u8 ChipID[12];
+	u8 Temper = SysInfo.Temper,Humidity = SysInfo.Humidity;
 	
-	ChipID_Get(ChipID);
+	/* 显示序列号 */
+	OLED_ShowString(0,2,64,&SerialNumberString_16x16[0][0],4);
 	
 	for(u32 i = 0;i  < 3;i++)
 	{
 		for(u32 j = 0;j < 4;j++)
 		{
-			OLED_Show_XxN8_Character(i * 2 + 1,j * 8 * 2 + 32,2,8,&HexChar_8x16[ChipID[12 - (i * 4 + j)] >> 4][0]);
-			OLED_Show_XxN8_Character(i * 2 + 1,j * 8 * 2 + 8 + 32,2,8,&HexChar_8x16[ChipID[12 - (i * 4 + j)]&0x0F][0]);
+			OLED_Show_XxN8_Character(i * 2 + 2,j * 8 * 2 + 64,2,8,&HexChar_8x16[SysInfo.SysSN[11 - (i * 4 + j)] >> 4][0]);
+			OLED_Show_XxN8_Character(i * 2 + 2,j * 8 * 2 + 8 + 64,2,8,&HexChar_8x16[SysInfo.SysSN[11 - (i * 4 + j)]&0x0F][0]);
 		}
-		
 	}
+	
+	/* 显示温度与湿度 */
+	OLED_ShowString(0,2,0,&TemperString_16x16[0][0],2);
+	OLED_Show_XxN8_Character(0,32,2,8,&HexChar_8x16[Temper/10][0]);
+	OLED_Show_XxN8_Character(0,32+8,2,8,&HexChar_8x16[Temper%10][0]);
+	OLED_Show_XxN8_Character(0,32+16,2,16,& SymbolChar_16x16[0][0]);
+	OLED_ShowString(2,2,0,&HumidityString_16x16[0][0],2);
+	OLED_Show_XxN8_Character(2,32,2,8,&HexChar_8x16[Humidity/10][0]);
+	OLED_Show_XxN8_Character(2,32+8,2,8,&HexChar_8x16[Humidity%10][0]);
+	OLED_Show_XxN8_Character(2,32+16,2,16,& SymbolChar_16x16[1][0]);
+	
+	/* WIFI 状态 */
+	OLED_ShowString(4,2,0,&NetStatusString_16x16[0][0],4);
+	if(SysInfo.WIFI_Status == 0)
+	{
+		OLED_ShowString(6,2,0,&SuccessString_16x16[0][0],2);
+	}
+	else
+	{
+		OLED_ShowString(6,2,0,&FailString_16x16[0][0],2);
+		SysInfo.WIFI_Status  = 0;
+	}
+	
+	return ;
+}
+
+void Remote_Control(u8 IR_Value)
+{
+	if(IR_Value >= '0' && IR_Value <= '9')
+	{
+		SysInfo.Curtain.TargetPlace = IR_Value - '0';
+	}
+	else if(IR_Value >= 24 && IR_Value <= 27)
+	{
+		switch(IR_Value)
+		{
+			case 24:
+				SysInfo.RGB_LED.Blue = 64;
+				SysInfo.RGB_LED.Green = 0;
+				SysInfo.RGB_LED.Red = 0;
+				break;
+			case 25:
+				SysInfo.RGB_LED.Blue = 0;
+				SysInfo.RGB_LED.Green = 64;
+				SysInfo.RGB_LED.Red = 0;
+				break;
+			case 26:
+				SysInfo.RGB_LED.Blue = 0;
+				SysInfo.RGB_LED.Green = 0;
+				SysInfo.RGB_LED.Red = 64;
+				break;
+			case 27:
+				SysInfo.RGB_LED.Blue = 64;
+				SysInfo.RGB_LED.Green = 64;
+				SysInfo.RGB_LED.Red = 64;
+				break;
+		}
+	}
+	else if(IR_Value == '\n')
+	{
+		SysInfo.RGB_LED.Blue = 0;
+		SysInfo.RGB_LED.Green = 0;
+		SysInfo.RGB_LED.Red = 0;
+		SysInfo.Curtain.TargetPlace = 0;
+		SysInfo.FanMotor = 0;
+	}
+	else
+	{
+	}
+	
 	return ;
 }
 

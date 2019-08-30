@@ -151,6 +151,26 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief  This function handles USART2 interrupt request.
+  * @param  None
+  * @retval None
+  */
+void USART2_IRQHandler(void)
+{
+	if(USART_GetITStatus(USART2,USART_IT_RXNE)!=RESET)
+	{
+		RecvBuff[RecvCount++] = USART_ReceiveData(USART2);
+		if(RecvCount >= 1024)
+		{
+			RecvCount = 0;
+		}
+	}
+	else
+	{
+	}
+}
+
+/**
   * @brief  This function handles TIM2 interrupt request.
   * @param  None
   * @retval None
@@ -241,33 +261,38 @@ void TIM2_IRQHandler(void)
 void TIM4_IRQHandler(void)
 {
 	static u32 Laps = 0;
+	
 	if(TIM_GetITStatus(TIM4,TIM_IT_Update) != RESET)
 	{
 		/* Interrupt task */
-		if(Curtain.TargetPlace > Curtain.CurrentPlace)
+		
+		
+		if(SysInfo.Curtain.TargetPlace > SysInfo.Curtain.CurrentPlace)
 		{
-			Curtain.MoveDirection = 1;
+			SysInfo.Curtain.MoveDirection = 1;
 		}
-		else if(Curtain.TargetPlace < Curtain.CurrentPlace)
+		else if(SysInfo.Curtain.TargetPlace < SysInfo.Curtain.CurrentPlace)
 		{
-			Curtain.MoveDirection = -1;
+			SysInfo.Curtain.MoveDirection = -1;
 		}
 		else
 		{
-			Curtain.MoveDirection = 0;
+			SysInfo.Curtain.MoveDirection = 0;
 		}
 		
-		Step_Motor_Roll();
+		StepMotor_Roll();
 		
-		if(Laps > 80)
+		if(Laps >= 76)
 		{
 			Laps = 0;
-			Curtain.CurrentPlace += Curtain.MoveDirection;
+			SysInfo.Curtain.CurrentPlace += SysInfo.Curtain.MoveDirection;
 		}
 		else
 		{
 			Laps++;
 		}
+		
+		
 		
 		
 		/* Clears the TIM4 interrupt update pending bit. */

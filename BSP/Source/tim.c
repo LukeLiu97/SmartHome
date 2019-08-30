@@ -85,7 +85,7 @@ void TIM3_PWM_Init(u16 us)
 	/* PWM1 Mode configuration: Channel1 */
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 250;
+	TIM_OCInitStructure.TIM_Pulse = 0;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 	TIM_OC1Init(TIM3, &TIM_OCInitStructure);
 	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
@@ -93,7 +93,7 @@ void TIM3_PWM_Init(u16 us)
 	/* PWM1 Mode configuration: Channel2 */
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = 750;
+	TIM_OCInitStructure.TIM_Pulse = 0;
 	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 	TIM_OC2Init(TIM3, &TIM_OCInitStructure);
 	TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Enable);

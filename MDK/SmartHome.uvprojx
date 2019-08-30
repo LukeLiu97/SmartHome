@@ -597,6 +597,11 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\Source\dht11.c</FilePath>
             </File>
+            <File>
+              <FileName>esp8266.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\esp8266.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -1191,6 +1196,11 @@
               <FileName>dht11.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\Source\dht11.c</FilePath>
+            </File>
+            <File>
+              <FileName>esp8266.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Source\esp8266.c</FilePath>
             </File>
           </Files>
         </Group>

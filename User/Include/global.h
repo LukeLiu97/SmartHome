@@ -19,12 +19,12 @@ extern "C"
 #include "stm32f10x.h"
 
 /* Exported types ------------------------------------------------------------*/
-typedef struct CurtainStu_
+typedef struct StepMotorStu_
 {
 	u8 CurrentPlace;
 	u8 TargetPlace;
 	s8 MoveDirection;
-}CurtainStu;
+}StepMotorStu;
 
 typedef struct RemoteStu_
 {
@@ -46,16 +46,34 @@ union UserData_
 	u8 DataArray[4];
 };
 
+typedef struct SysInfoStu_
+{
+	u8 SysSN[13];
+	RGBStu RGB_LED;
+	StepMotorStu Curtain;
+	s8 FanMotor;
+	u8 Socket;
+	float Temper;
+	float Humidity;
+	u8 WIFI_Status;
+}SysInfoStu;
+
 /* Extern variables ----------------------------------------------------------*/
 extern u8 ReversalFlag;
 
-extern CurtainStu Curtain;
+//extern CurtainStu Curtain;
 
 extern RemoteStu Remote;
 
-extern RGBStu RGB;
+//extern RGBStu RGB;
 
 extern union UserData_ UserData;
+
+extern u8 RecvBuff[1024];
+extern u32 RecvCount;
+extern u8 RecvEnd;
+
+extern SysInfoStu SysInfo;
 
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/

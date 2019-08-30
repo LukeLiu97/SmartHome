@@ -21,7 +21,7 @@ extern "C"
 #include "stm32f10x.h"
 
 #include <stdio.h>
-
+#include "global.h"
 #include "led.h"
 #include "uart.h"
 #include "time.h"
@@ -32,6 +32,7 @@ extern "C"
 #include "irda.h"
 #include "embed_flash.h"
 #include "dht11.h"
+#include "esp8266.h"
 
 /* Exported types ------------------------------------------------------------*/
 
